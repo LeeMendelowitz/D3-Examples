@@ -55,7 +55,7 @@
   // UTILITY FUNCTIONS
 
   // Make a key-value object
-  var kv = function(k, v) {
+  var make_key_value = function(k, v) {
     return { key: k,
              value: v
            };
@@ -63,14 +63,13 @@
 
   // Join a key array with a data array.
   // Return an array of key-value objects.
-  var merge = function(row_names, data_list) {
-    var l = row_names.length;
+  var merge = function(keys, values) {
+    var l = keys.length;
     var d = [], v, k;
     for(var i = 0; i < l; i++) {
-      v = data_list[i].slice();
-      k = row_names[i];
-      v.unshift(k); // Add row name as first column of row.
-      d.push( kv( k, v ));
+      v = values[i].slice();
+      k = keys[i];
+      d.push( make_key_value( k, v ));
     }
     return d;
   };
@@ -142,10 +141,19 @@
   /////////////////////////////////////////////
   // DEFINE HELPER FUNCTIONS
   // Extract key from key-value object.
-  var keyf = function(d) { return d && d.key; };
+  var get_key = function(d) { return d && d.key; };
 
   // Extract data from a key-value object.
-  var use_data = function(d) { return d && d.value; };
+  // Prepend the key so it is the first item in the values array.
+  var extract_row_data = function(d) {
+
+    var values = d.value.slice();
+
+    // Prepend the key
+    values.unshift(d.key); 
+    return values;
+
+  };
 
   // Use data as is.
   var ident = function(d) { return d; };
@@ -160,13 +168,13 @@
   // Define function to update data
   var update = function(new_data) {
 
-    var rows = table.selectAll('tr').data(new_data, keyf);
+    var rows = table.selectAll('tr').data(new_data, get_key);
 
     //////////////////////////////////////////
     // ROW UPDATE SELECTION
 
     // Update cells in existing rows.
-    var cells = rows.selectAll('td').data(use_data);
+    var cells = rows.selectAll('td').data(extract_row_data);
 
     cells.attr('class', 'update');
 
@@ -195,7 +203,7 @@
     // Add new rows
     var cells_in_new_rows = rows.enter().append('tr')
                                 .selectAll('td')
-                                .data(use_data);
+                                .data(extract_row_data);
 
     cells_in_new_rows.enter().append('td')
       .style('opacity', 0.0)
