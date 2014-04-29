@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+ <html>
+ <head>
+   <title>Playing with Enter and Update</title>
+   <script src="http://d3js.org/d3.v3.min.js"></script>
+   <style>
+     p {
+      color: black;
+     }
+
+     .enter { 
+        color: green;
+     }
+
+     .update { 
+        color: blue;
+     }
+
+   </style>
+ </head>
+ <body>
+  <p>The script will start after a short delay.</p>
+
+  <h1> No Paragraphs </h1>
+  <p>There are no paragraphs here, d3 inserts them.</p>
+  <div id="sec1">
+  </div>
+
+  <h1>Style Update and Enter Selections Together</h1>
+  <p>There are initially two paragraphs here. After appending to the enter selection,
+  D3 merges the enter selection with the update selection. After doing this we both set the text
+  and apply a violet color to the update selection, which will modify all of the paragraphs - both
+  existing and newly inserted. From <a href="https://github.com/mbostock/d3/wiki/Selections#enter">D3 Wiki</a>:
+  <blockquote>
+  The enter selection merges into the update selection when you append or insert. This approach reduces code duplication between enter and update. Rather than applying operators to both the enter and update selection separately, you can now apply them to the update selection after entering the nodes. In the rare case that you want to run operators only on the updating nodes, you can run them on the update selection before entering new nodes.
+  </blockquote>
+
+  </p>
+
+  <div id="sec2">
+  <p>Paragraph 1</p>
+  <p>Paragraph 2</p>
+  </div>
+
+  <h1>Style Enter and Update Selections Separately</h1>
+  <p>There are initially two paragraphs here. We style the update and enter selections separately,
+  and set the text on the update selection after we have appended to the enter selection.</p>
+
+  <div id="sec3">
+  <p>Paragraph 1</p>
+  <p>Paragraph 2</p>
+  </div>
+
+
+ <script>
+
+var data = [1,2,3,4,5];
+
+var update = function() {
+  //////////////////////////////////
+  d3.select("#sec1").selectAll('p')
+    .data(data).enter().append('p')
+    .text(function(d) { return d; })
+    .attr('class', 'enter');
+
+  //////////////////////////////////
+  var sec2_update = d3.select("#sec2").selectAll('p').data(data);
+  sec2_update.enter().append('p');
+
+  // After call to append, enter selection is merged with update selection
+  // This will modify both the update and enter section
+  sec2_update.text(function(d) { return d;}).style('color', 'violet');
+
+  ///////////////////////////////////
+  var sec3_update = d3.select("#sec3").selectAll('p').data(data);
+
+  // Style the update selection and enter selection separately.
+  sec3_update.attr('class', 'update');
+  sec3_update.enter().append('p').attr('class', 'enter')
+
+  // Set the text on the update selection, after we have appended to enter selection.
+  // This will modify all of the paragraphs.
+  sec3_update.text(function(d) { return d;});
+
+};
+
+setTimeout(update, 2000);
+
+</script>
+
+ </body>
+ </html> 
